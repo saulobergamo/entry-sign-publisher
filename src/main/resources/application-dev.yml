@@ -1,0 +1,46 @@
+server:
+  port: ${ENV_PORT:9085}
+  servlet:
+    contextPath: ${ENV_CTX_PATH:/entry-sign-publisher}
+
+spring:
+  boot:
+    admin:
+      client:
+        url: ${ENV_SBA_BASE_URL:http://localhost:9080/sba}
+        username: admin
+        password: admin
+        enabled: ${ENV_SBA_ACTIVE:false}
+        instance:
+          name: ${spring.application.name}
+          prefer-ip: true
+  application:
+    name: entry-sign-publisher
+  activemq:
+    broker-url: ${ENV_ACTIVEMQ_URL:tcp://localhost:61616}
+    user: ${ENV_ACTIVEMQ_USER:admin}
+    password: ${ENV_ACTIVEMQ_PASSWORD:admin}
+    send-timeout: ${ENV_ACTIVEMQ_SEND_TIMEOUT:10000}
+    queue:
+      entry-sign: ${ENV_ACTIVEMQ_QUEUE_ENTRY_SIGN:entry-sign}
+    packages:
+      trust-all: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - loggers
+  endpoint:
+    health:
+      show-details: always
+
+http:
+  timeout: ${ENV_HTTP_TIMEOUT:10}
+  debug: ${ENV_HTTP_DEBUG:false}
+
+springdoc:
+  packagesToScan: br.com.utfpr.images.entry.sign.publisher.controller
+  pathsToMatch: /**
