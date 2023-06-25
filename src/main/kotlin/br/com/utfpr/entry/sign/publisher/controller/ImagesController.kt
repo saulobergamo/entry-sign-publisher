@@ -1,7 +1,6 @@
 package br.com.utfpr.entry.sign.publisher.controller
 
 import br.com.utfpr.entry.sign.publisher.service.ImagesService
-import br.com.utfpr.images.rebuild.by.sign.enums.ImageSize
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import mu.KotlinLogging
@@ -19,7 +18,7 @@ import javax.validation.constraints.NotBlank
 @Tag(name = "Images rebuild by sign - CSM30")
 @Validated
 @RestController
-@RequestMapping("/images/{documentNumber}")
+@RequestMapping("/images/{userName}")
 class ImagesController(private val imagesService: ImagesService) {
 
     private val logger = KotlinLogging.logger { }
@@ -28,28 +27,27 @@ class ImagesController(private val imagesService: ImagesService) {
     @Operation(summary = "get images by user documentNumber")
     fun getImages(
         @PathVariable @Valid @NotBlank
-        documentNumber: String
+        userName: String
     ): String {
-        logger.info { "getImages: getting images for user=$documentNumber" }
+        logger.info { "getImages: getting images for user=$userName" }
         return imagesService.getImages().also {
-            logger.info { "getImages: success getting images for user=$documentNumber" }
+            logger.info { "getImages: success getting images for user=$userName" }
         }
     }
 
     @PostMapping("/upload")
     @Operation(summary = "post csv document")
     fun postSignCSV(
-        @RequestParam csv: MultipartFile,
+        @RequestParam csv: MultipartFile? = null,
         @PathVariable @Valid @NotBlank
-        documentNumber: String,
-        @RequestParam size: ImageSize
+        userName: String
     ) {
         logger.info {
-            "postSignCSV: processing file uploaded by user=$documentNumber\""
+            "postSignCSV: processing file uploaded by user=$userName\""
         }
-        return imagesService.processSign(documentNumber, csv, size).also {
+        return imagesService.processSign(userName, csv).also {
             logger.info {
-                "processSign: file uploaded from user=$documentNumber"
+                "processSign: file uploaded from user=$userName"
             }
         }
     }

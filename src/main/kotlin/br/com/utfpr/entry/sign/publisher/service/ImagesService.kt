@@ -1,10 +1,10 @@
 package br.com.utfpr.entry.sign.publisher.service
 
-import br.com.utfpr.entry.sign.publisher.EntrySignPublisher
+import br.com.utfpr.entry.sign.publisher.publisher.EntrySignPublisher
 import br.com.utfpr.entry.sign.publisher.util.FILE_PATH
 import br.com.utfpr.entry.sign.publisher.util.readCsvToDoubleMatrix
-import br.com.utfpr.images.rebuild.by.sign.enums.ImageSize
 import mu.KotlinLogging
+import org.jblas.DoubleMatrix
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 
@@ -19,12 +19,19 @@ class ImagesService(
     }
 
     fun processSign(
-        documentNumber: String,
-        csv: MultipartFile,
-        imageSize: ImageSize
+        userName: String,
+        csv: MultipartFile?
     ) {
-        val entrySign = readCsvToDoubleMatrix(csv)
-        val entrySignString = entrySign.toString()
-        publisher.sendEntrySign(entrySignString, documentNumber)
+        logger.info {
+            "processSign: try to read entrySign received as .csv file"
+        }
+        var entrySign: DoubleMatrix? = null
+        try {
+            entrySign = readCsvToDoubleMatrix(csv)
+        } catch (e: Exception) {
+            logger.error(e) { "processSign: unable to read .csv file" }
+        }
+
+        publisher.sendEntrySign(entrySign, userName)
     }
 }
