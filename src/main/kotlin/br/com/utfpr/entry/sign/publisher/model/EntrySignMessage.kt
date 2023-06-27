@@ -1,8 +1,7 @@
 package br.com.utfpr.entry.sign.publisher.model
 
-import org.jblas.DoubleMatrix
-
 data class EntrySignMessage(
+    val clientId: String? = null,
     val documentNumber: String? = null,
-    val entrySignDoubleMatrix: DoubleMatrix? = null
+    val entrySignDouble: List<Double>? = null
 )

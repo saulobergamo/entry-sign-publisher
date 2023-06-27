@@ -1,8 +1,8 @@
 package br.com.utfpr.entry.sign.publisher.publisher
 
+import br.com.utfpr.entry.sign.publisher.model.EntrySignMessage
 import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
-import org.jblas.DoubleMatrix
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.jms.core.JmsTemplate
 import org.springframework.stereotype.Component
@@ -17,13 +17,16 @@ class EntrySignPublisher(
 ) {
     private val logger = KotlinLogging.logger {}
 
-    fun sendEntrySign(entrySignString: DoubleMatrix?, documentNumber: String) {
-        logger.info { "sendEntrySign: try to send entry sign to queue for user=$documentNumber" }
-        val entrySignAsList = entrySignString?.elementsAsList()
-        val message = objectMapper.writeValueAsString(documentNumber + entrySignAsList)
+    fun sendEntrySign(entrySignMessage: EntrySignMessage) {
+        logger.info { "sendEntrySign: try to send entry sign to queue for user=${entrySignMessage.documentNumber}" }
+
+        val message = objectMapper.writeValueAsString(entrySignMessage)
 
         jmsTemplate.convertAndSend(queue, message).also {
-            logger.info { "sendEntrySign: entry sign  sent to queue with success for user=$documentNumber" }
+            logger.info {
+                "sendEntrySign: entry sign  sent to queue " +
+                    "with success for user=${entrySignMessage.documentNumber}"
+            }
         }
     }
 }
