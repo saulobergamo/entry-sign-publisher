@@ -9,5 +9,4 @@ interface EntrySignRepository : MongoRepository<EntrySign, String> {
     fun findByDocumentNumber(documentNumber: String): EntrySign?
 
     fun findByClientId(clientId: String): EntrySign?
-
 }

@@ -3,13 +3,11 @@ package br.com.utfpr.entry.sign.publisher.service
 import br.com.utfpr.entry.sign.publisher.model.EntrySignMessage
 import br.com.utfpr.entry.sign.publisher.publisher.EntrySignPublisher
 import br.com.utfpr.entry.sign.publisher.repository.EntrySignRepository
-import br.com.utfpr.entry.sign.publisher.util.FILE_PATH
 import br.com.utfpr.entry.sign.publisher.util.readCsvToDoubleMatrix
 import mu.KotlinLogging
 import org.jblas.DoubleMatrix
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import java.sql.ClientInfoStatus
 import java.util.*
 
 @Service
@@ -19,7 +17,7 @@ class ImagesService(
 ) {
     private val logger = KotlinLogging.logger {}
 
-    fun getImages(clientId: String) : String {
+    fun getImages(clientId: String): String {
         return entrySignRepository.findByClientId(clientId)?.documentNumber.toString()
     }
 
