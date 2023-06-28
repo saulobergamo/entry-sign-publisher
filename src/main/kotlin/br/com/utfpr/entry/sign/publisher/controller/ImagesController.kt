@@ -27,10 +27,12 @@ class ImagesController(private val imagesService: ImagesService) {
     @Operation(summary = "get images by user documentNumber")
     fun getImages(
         @PathVariable @Valid @NotBlank
-        userName: String
+        userName: String,
+        @RequestParam @NotBlank
+        imageId: String
     ): String {
         logger.info { "getImages: getting images for user=$userName" }
-        return imagesService.getImages().also {
+        return imagesService.getImages(imageId).also {
             logger.info { "getImages: success getting images for user=$userName" }
         }
     }
