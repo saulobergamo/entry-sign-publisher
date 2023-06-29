@@ -6,7 +6,5 @@ import org.springframework.data.mongodb.repository.MongoRepository
 
 @Document
 interface EntrySignRepository : MongoRepository<EntrySign, String> {
-    fun findByDocumentNumber(documentNumber: String): EntrySign?
-
-    fun findByClientId(clientId: String): EntrySign?
+    fun findByImageId(imageId: String): EntrySign?
 }

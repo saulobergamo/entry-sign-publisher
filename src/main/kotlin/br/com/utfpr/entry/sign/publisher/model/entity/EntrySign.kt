@@ -9,8 +9,8 @@ class EntrySign(
     @Id
     var id: String? = null,
     @Indexed
-    var clientId: String? = null,
-    @Indexed
-    var documentNumber: String? = null,
+    var imageId: String? = null,
+    var userName: String? = null,
+    var signType: Boolean? = false,
     var entrySignDouble: List<Double>? = null
 )

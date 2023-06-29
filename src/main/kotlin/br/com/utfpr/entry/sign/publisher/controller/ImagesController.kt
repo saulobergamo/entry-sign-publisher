@@ -44,11 +44,11 @@ class ImagesController(private val imagesService: ImagesService) {
         @RequestParam csv: MultipartFile? = null,
         @PathVariable @Valid @NotBlank
         userName: String
-    ) {
+    ): String? {
         logger.info {
             "postSignCSV: processing file uploaded by user=$userName\""
         }
-        return imagesService.processSign(userName, csv).also {
+        return imagesService.processEntrySign(userName, csv).also {
             logger.info {
                 "processSign: file uploaded from user=$userName"
             }

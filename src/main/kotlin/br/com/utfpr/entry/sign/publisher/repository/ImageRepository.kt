@@ -5,5 +5,5 @@ import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.MongoRepository
 @Document
 interface ImageRepository : MongoRepository<ImageMessage, String> {
-    fun findByClientId(clientId: String): ImageMessage?
+    fun findByimageId(imageId: String): ImageMessage?
 }

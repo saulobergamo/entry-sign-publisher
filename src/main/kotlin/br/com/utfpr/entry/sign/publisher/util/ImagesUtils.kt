@@ -11,4 +11,5 @@ fun readCsvToDoubleMatrix(csv: MultipartFile?): DoubleMatrix {
     return DoubleMatrix(realVector)
 }
 
-const val FILE_PATH = "src/main/resources/"
+const val SIXTY = 60
+const val THIRTY = 30

@@ -18,14 +18,14 @@ class EntrySignPublisher(
     private val logger = KotlinLogging.logger {}
 
     fun sendEntrySign(entrySignMessage: EntrySignMessage) {
-        logger.info { "sendEntrySign: try to send entry sign to queue for user=${entrySignMessage.documentNumber}" }
+        logger.info { "sendEntrySign: try to send entry sign to queue for user=${entrySignMessage.userName}" }
 
         val message = objectMapper.writeValueAsString(entrySignMessage)
 
         jmsTemplate.convertAndSend(queue, message).also {
             logger.info {
                 "sendEntrySign: entry sign  sent to queue " +
-                    "with success for user=${entrySignMessage.documentNumber}"
+                    "with success for user=${entrySignMessage.userName}"
             }
         }
     }
