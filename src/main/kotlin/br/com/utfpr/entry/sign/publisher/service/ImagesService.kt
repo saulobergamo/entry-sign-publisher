@@ -14,7 +14,6 @@ import br.com.utfpr.entry.sign.publisher.util.THIRTY
 import br.com.utfpr.entry.sign.publisher.util.readCsvToDoubleMatrix
 import mu.KotlinLogging
 import org.jblas.DoubleMatrix
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.awt.Color

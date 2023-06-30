@@ -29,7 +29,8 @@ class ImagesController(private val imagesService: ImagesService) {
     @GetMapping("/download")
     @Operation(summary = "get images by user documentNumber")
     fun getImages(
-        @RequestParam @Valid @NotBlank imageId: String
+        @RequestParam @Valid @NotBlank
+        imageId: String
     ): ResponseEntity<ImageReport?> {
         logger.info { "getImages: getting images - imageId=$imageId" }
         val responseHeader = HttpHeaders()
@@ -38,9 +39,7 @@ class ImagesController(private val imagesService: ImagesService) {
         val response = imagesService.getImages(imageId)
         return ResponseEntity.ok().headers(responseHeader).body(response).also {
             logger.info { "getImages: success getting images for user=${it.body?.userName}" }
-
         }
-
     }
 
     @PostMapping("/upload")
