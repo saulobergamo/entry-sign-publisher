@@ -1,8 +1,10 @@
 package br.com.utfpr.entry.sign.publisher.service
 
+import br.com.utfpr.entry.sign.publisher.exception.NotFoundException
 import br.com.utfpr.entry.sign.publisher.model.EntrySignMessage
 import br.com.utfpr.entry.sign.publisher.model.ImageReport
 import br.com.utfpr.entry.sign.publisher.model.entity.EntrySign
+import br.com.utfpr.entry.sign.publisher.model.entity.ImageMessage
 import br.com.utfpr.entry.sign.publisher.publisher.EntrySignPublisher
 import br.com.utfpr.entry.sign.publisher.repository.EntrySignRepository
 import br.com.utfpr.entry.sign.publisher.repository.ImageRepository
@@ -17,6 +19,10 @@ import org.springframework.web.multipart.MultipartFile
 import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.*
 import javax.imageio.ImageIO
 import kotlin.math.roundToInt
@@ -30,8 +36,27 @@ class ImagesService(
     private val logger = KotlinLogging.logger {}
 
     fun getImages(imageId: String): ResponseEntity<Any>? {
-        val mongoResponse = imageRepository.findByimageId(imageId)
-        val size = if (mongoResponse?.signType == "true") SIXTY else THIRTY
+        val mongoResponse: ImageMessage?
+        try {
+            mongoResponse = imageRepository.findByimageId(imageId)
+            if (mongoResponse != null) {
+                return buildImage(mongoResponse)
+            } else throw NotFoundException("getImages: image not found for imageId=$imageId")
+        } catch (e: NotFoundException) {
+            logger.error(e) {
+                "getImages: image not found for imageId=$imageId"
+            }
+            throw e
+        } catch (e: Exception) {
+            logger.error {
+                "getImages: error getting image from database for imageId=$imageId"
+            }
+            throw e
+        }
+    }
+
+    private fun buildImage(mongoResponse: ImageMessage): ResponseEntity<Any> {
+        val size = if (mongoResponse.signType == "true") SIXTY else THIRTY
         // Criar uma imagem BufferedImage
         val image = BufferedImage(size, size, BufferedImage.TYPE_BYTE_GRAY)
 
@@ -39,7 +64,7 @@ class ImagesService(
         for (i in 0 until size) {
             for (j in 0 until size) {
                 // Converter para escala de 0-255
-                val pixelValue = ((mongoResponse?.image?.get(i)?.get(j) ?: 0).toFloat().roundToInt())
+                val pixelValue = ((mongoResponse.image?.get(i)?.get(j) ?: 0).toFloat().roundToInt())
                 val color = Color(pixelValue, pixelValue, pixelValue) // Criar uma cor grayscale
                 image.setRGB(j, i, color.rgb) // Definir o valor do pixel na imagem
             }
@@ -53,18 +78,46 @@ class ImagesService(
         val base64Image = Base64.getEncoder().encodeToString(imageBytes)
 
         val response = ImageReport(
-            userName = mongoResponse?.userName,
-            iterations = mongoResponse?.iterations,
-            runTime = mongoResponse?.runTime,
-            error = mongoResponse?.error,
-            memory = mongoResponse?.memory,
+            imageId = mongoResponse.imageId,
+            userName = mongoResponse.userName,
+            iterations = mongoResponse.iterations,
+            runTime = mongoResponse.runTime,
+            error = mongoResponse.error,
+            memory = mongoResponse.memory,
+            signType = mongoResponse.signType,
+            algorithm = mongoResponse.algorithm,
+            cpuUsage = mongoResponse.cpu,
+            imagePath = byteArrayToJpg(imageBytes, "src/main/resources/${mongoResponse.imageId}.jpg"),
             image = imageBytes
         )
         return ResponseEntity.ok(response)
-//
-//        val headers = org.springframework.http.HttpHeaders()
-//        headers.contentType = MediaType.IMAGE_PNG
-//        return ResponseEntity<Any>(mapOf("image" to image, "data" to response), headers, HttpStatus.OK)
+    }
+
+    private fun byteArrayToJpg(byteArray: ByteArray, imagePath: String): String? {
+        try {
+            // Criar um arquivo temporário para armazenar os bytes do array
+            val tempFilePath = Files.createTempFile("temp_image", ".jpg")
+
+            // Gravar o byteArray no arquivo temporário
+            FileOutputStream(tempFilePath.toFile()).use { stream ->
+                stream.write(byteArray)
+            }
+
+            // Renomear o arquivo temporário com o caminho especificado
+            val targetPath = Paths.get(imagePath)
+            Files.move(tempFilePath, targetPath)
+
+            // Retornar o caminho da imagem
+            return targetPath.toString()
+        } catch (e: IOException) {
+            logger.error(e) {
+                "byteArrayToJpg: error converting byteArray to image JPG for image+$imagePath"
+            }
+            // Lidar com exceções ou erros ao processar o arquivo
+        }
+
+        // Retornar null em caso de erro
+        return null
     }
 
     fun processEntrySign(
@@ -76,7 +129,8 @@ class ImagesService(
         }
 
 //        val id = UUID.randomUUID() // Gera um UUID aleatório
-        val imageId = UUID.randomUUID().toString() // Converte o UUID para uma string
+        var imageId = UUID.randomUUID().toString() // Converte o UUID para uma string
+        while (entrySignRepository.findByImageId(imageId) != null) imageId = UUID.randomUUID().toString()
 
         val entrySign: DoubleMatrix?
 
@@ -92,6 +146,7 @@ class ImagesService(
         }
         return imageId
     }
+
     private fun prepareMessage(
         idString: String,
         documentNumber: String,

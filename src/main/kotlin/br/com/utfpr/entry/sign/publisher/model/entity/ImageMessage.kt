@@ -9,13 +9,14 @@ data class ImageMessage(
     @Id
     var id: String? = null,
     @Indexed
-    val userName: String? = null,
-    @Indexed
     val imageId: String? = null,
+    val userName: String? = null,
     val iterations: Int? = null,
     val runTime: Double? = null,
     val error: Double? = null,
     val memory: Double? = null,
     val signType: String? = null,
+    val algorithm: String? = null,
+    val cpu: Double? = null,
     val image: List<List<Double>>? = null
 )

@@ -46,5 +46,5 @@ http:
   debug: ${ENV_HTTP_DEBUG:false}
 
 springdoc:
-  packagesToScan: br.com.utfpr.images.entry.sign.publisher.controller
+  packagesToScan: br.com.utfpr.entry.sign.publisher.controller
   pathsToMatch: /**

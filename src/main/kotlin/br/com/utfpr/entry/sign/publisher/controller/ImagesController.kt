@@ -7,7 +7,6 @@ import mu.KotlinLogging
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -16,10 +15,10 @@ import org.springframework.web.multipart.MultipartFile
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
 
-@Tag(name = "Images rebuild by sign - CSM30")
+@Tag(name = "EntrySignPyblisher")
 @Validated
 @RestController
-@RequestMapping("/images/{userName}")
+@RequestMapping("/images")
 class ImagesController(private val imagesService: ImagesService) {
 
     private val logger = KotlinLogging.logger { }
@@ -27,9 +26,8 @@ class ImagesController(private val imagesService: ImagesService) {
     @GetMapping("/download")
     @Operation(summary = "get images by user documentNumber")
     fun getImages(
-        @PathVariable @Valid @NotBlank
-        userName: String,
-        @RequestParam @NotBlank
+        @RequestParam(name = "userName", required = false) userName: String,
+        @RequestParam @Valid @NotBlank
         imageId: String
     ): ResponseEntity<Any>? {
         logger.info { "getImages: getting images for user=$userName" }
@@ -41,9 +39,9 @@ class ImagesController(private val imagesService: ImagesService) {
     @PostMapping("/upload")
     @Operation(summary = "post csv document")
     fun postSignCSV(
-        @RequestParam csv: MultipartFile? = null,
-        @PathVariable @Valid @NotBlank
-        userName: String
+        @RequestParam(name = "userName", required = false) userName: String,
+        @RequestParam @Valid
+        csv: MultipartFile? = null
     ): String? {
         logger.info {
             "postSignCSV: processing file uploaded by user=$userName\""
