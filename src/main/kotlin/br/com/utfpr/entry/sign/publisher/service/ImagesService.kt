@@ -3,6 +3,7 @@ package br.com.utfpr.entry.sign.publisher.service
 import br.com.utfpr.entry.sign.publisher.exception.NotFoundException
 import br.com.utfpr.entry.sign.publisher.model.EntrySignMessage
 import br.com.utfpr.entry.sign.publisher.model.ImageReport
+import br.com.utfpr.entry.sign.publisher.model.UploadResponse
 import br.com.utfpr.entry.sign.publisher.model.entity.EntrySign
 import br.com.utfpr.entry.sign.publisher.model.entity.ImageMessage
 import br.com.utfpr.entry.sign.publisher.publisher.EntrySignPublisher
@@ -35,7 +36,7 @@ class ImagesService(
 ) {
     private val logger = KotlinLogging.logger {}
 
-    fun getImages(imageId: String): ResponseEntity<Any>? {
+    fun getImages(imageId: String): ImageReport? {
         val mongoResponse: ImageMessage?
         try {
             mongoResponse = imageRepository.findByimageId(imageId)
@@ -55,7 +56,7 @@ class ImagesService(
         }
     }
 
-    private fun buildImage(mongoResponse: ImageMessage): ResponseEntity<Any> {
+    private fun buildImage(mongoResponse: ImageMessage): ImageReport {
         val size = if (mongoResponse.signType == "true") SIXTY else THIRTY
         // Criar uma imagem BufferedImage
         val image = BufferedImage(size, size, BufferedImage.TYPE_BYTE_GRAY)
@@ -77,7 +78,7 @@ class ImagesService(
         // Converter a imagem em base64
         val base64Image = Base64.getEncoder().encodeToString(imageBytes)
 
-        val response = ImageReport(
+        return ImageReport(
             imageId = mongoResponse.imageId,
             userName = mongoResponse.userName,
             iterations = mongoResponse.iterations,
@@ -90,7 +91,6 @@ class ImagesService(
             imagePath = byteArrayToJpg(imageBytes, "src/main/resources/${mongoResponse.imageId}.jpg"),
             image = imageBytes
         )
-        return ResponseEntity.ok(response)
     }
 
     private fun byteArrayToJpg(byteArray: ByteArray, imagePath: String): String? {
@@ -123,11 +123,11 @@ class ImagesService(
     fun processEntrySign(
         userName: String,
         csv: MultipartFile?
-    ): String? {
+    ): UploadResponse {
         logger.info {
             "processSign: try to read entrySign received as .csv file"
         }
-
+        val response = UploadResponse()
 //        val id = UUID.randomUUID() // Gera um UUID aleatório
         var imageId = UUID.randomUUID().toString() // Converte o UUID para uma string
         while (entrySignRepository.findByImageId(imageId) != null) imageId = UUID.randomUUID().toString()
@@ -144,7 +144,9 @@ class ImagesService(
         } catch (e: Exception) {
             logger.error(e) { "processSign: unable to read .csv file" }
         }
-        return imageId
+        response.imageId = imageId
+        response.userName = userName
+        return response
     }
 
     private fun prepareMessage(
